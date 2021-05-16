@@ -1,12 +1,16 @@
 #include <NewPing.h>
 #include <Servo.h>
 
+//PIR values
+int PIRVccPin = 7;
+int PIROutputPin = 6;
+
 //ultrasound values
 int triggerPin = 10;
 int echoPin = 11;
 int ultrasoundVccPin = 13;
 int minDistance_cm = 0;
-int maxDistance_cm = 83;
+int maxDistance_cm = 150;
 
 //servo values
 int servoPin = 8;
@@ -17,6 +21,11 @@ NewPing sonar(triggerPin, echoPin, maxDistance_cm);
 Servo servo;
 
 void setup() {
+  //setup PIR
+  pinMode(PIRVccPin, OUTPUT);
+  digitalWrite(PIRVccPin, HIGH);
+  pinMode(PIROutputPin, INPUT);
+  
   //setup ultrasound
   pinMode(ultrasoundVccPin,OUTPUT);
   digitalWrite(ultrasoundVccPin, HIGH);
@@ -28,24 +37,19 @@ void setup() {
   delay(500);
 }
 
-void loop() {  
-  
-  Serial.print("distance:");
-  Serial.println(sonar.ping_cm());
+void loop() { 
   
   if(isCatPresent()){
-    
     turnSprayOn();
     delay(300);
     turnSprayOff();
   }
-
- delay(1000);
+  
+  delay(10);
 }
 
-
 void turnSprayOn(){
-  Serial.print("Spray ON");
+  Serial.println("Turning spray ON");
   servo.write(finalAngle);
   delay(300);
   servo.write(initialAngle);
@@ -56,6 +60,7 @@ void turnSprayOn(){
 }
 
 void turnSprayOff(){
+  Serial.println("Turning spray OFF");
   servo.write(finalAngle);
   delay(300);
   servo.write(initialAngle);
@@ -64,20 +69,24 @@ void turnSprayOff(){
 
 /* isCatPresent(): Checks if cat is standing in front of machine or just passing by */
 bool isCatPresent(){
-
-  int catDistance = sonar.ping_cm();
-  if(catDistance > minDistance_cm) {
-    Serial.println("Cat passing by detected");
+  int delayInSeconds = 3;
+  
+  for(int i = 0; i < delayInSeconds; i++){
     
-    //check again after delay
-    delay(3000);
-    catDistance = sonar.ping_cm();
-    
-    if(catDistance > minDistance_cm) {
-      Serial.println("Cat staying confirmed");
-      return true;
-    }
+     int movement = digitalRead(PIROutputPin);
+     
+     if(movement == HIGH) {
+        Serial.print("Cat detected for ");
+        Serial.print(i+1);
+        Serial.println(" seconds");
+        delay(1000);
+        
+     }else{
+      Serial.println("No movement");
+      return false;
+     }
   }
-    
-   return false;
+  
+  Serial.println("Cat satying confirmed");
+  return true;
 }
