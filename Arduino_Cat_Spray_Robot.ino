@@ -1,16 +1,14 @@
-#include <Servo.h>
 #include <NewPing.h>
 
-//servo motor values
-int initialAngle = 0;
-int finalAngle = 35;
-Servo servo;
+int waterPumpOnPin = 13;
 
 //intiatiate sonar object
 int triggerPin = 10;
 int echoPin = 11;
-int maxDistance_cm = 200;
+int maxDistance_cm = 500;
+int initialDoordistance = 0;
 NewPing sonar(triggerPin, echoPin, maxDistance_cm);
+
 
 //PIR output pin
 int PIROutputPin = 6;
@@ -24,58 +22,46 @@ void setup() {
   pinMode(PIROutputPin, INPUT);
   
   //setup ultrasound
-  int ultrasoundVccPin = 13;
+  int ultrasoundVccPin = 12;
   pinMode(ultrasoundVccPin,OUTPUT);
   digitalWrite(ultrasoundVccPin, HIGH);
+  delay(300);
+  initialDoordistance = sonar.ping_cm();
+ 
+  //setup waterPump power pin
+  pinMode(waterPumpOnPin, OUTPUT);
+  digitalWrite(waterPumpOnPin, LOW);
 
-  //setup servo
-  int servoPin = 8;
-  servo.attach(servoPin);
-  servo.write(initialAngle);
   Serial.begin(9600);
-  delay(500);
+  delay(1000);
 }
 
 void loop() { 
+
+   //digitalWrite(waterPumpOnPin, HIGH);
+//int doorDistance = sonar.ping_cm();
+//Serial.println("doorDistance");
  
   if(isDoorClosed() && isCatPresent()){
-    turnSprayOn();
+    Serial.println("Turning spray ON");
+    digitalWrite(waterPumpOnPin, HIGH);
     delay(300);
-    turnSprayOff();
+    Serial.println("Turning spray Off");
+    digitalWrite(waterPumpOnPin, LOW);
   }
   
   delay(250);
 }
 
-/*turnSprayOn(): Activate servo motor sequence to turn on spray bottle */
-void turnSprayOn(){
-  Serial.println("Turning spray ON");
-  servo.write(finalAngle);
-  delay(300);
-  servo.write(initialAngle);
-  delay(300);
-  servo.write(finalAngle);
-  delay(300);
-  servo.write(initialAngle);
-}
-
-/*turnSprayOff(): Activate servo motor sequence to turn off spray bottle */
-void turnSprayOff(){
-  Serial.println("Turning spray OFF");
-  servo.write(finalAngle);
-  delay(300);
-  servo.write(initialAngle);
-}
-
 /* isDoorClosed(): Checks bedroom's door is open or closed */
 bool isDoorClosed(){
   
-  int closedDoorDistance_cm = 90;
   int doorDistance = sonar.ping_cm();
-  Serial.println(doorDistance);
   
-  if(doorDistance > closedDoorDistance_cm) {
+  if(doorDistance >  initialDoordistance + 5) {
     Serial.println("Door is open");
+    Serial.println(initialDoordistance);
+    Serial.println(doorDistance);
      return false;
   }else{
     Serial.println("Door is closed");
@@ -85,12 +71,12 @@ bool isDoorClosed(){
 
 /* isCatPresent(): Checks if cat is standing in front of machine or just passing by */
 bool isCatPresent(){
-  int delayInSeconds = 10;
+  int delayInSeconds = 9;
 
   int movement = digitalRead(PIROutputPin);
      
     if(movement == HIGH) {
-      Serial.println("GINGOL detected!"); //Ginglos is our cat's name
+      Serial.println("GINGOL detected!"); //Gingol is our cat's name
     
       for(int i = delayInSeconds; i > 0; i--){
         Serial.print("Checking again in: ");
@@ -101,7 +87,11 @@ bool isCatPresent(){
 
       //checking if cat still standing by the door after delay
       movement = digitalRead(PIROutputPin);
+      Serial.println(movement);
+      
+      Serial.println("checking cat again");
       if(movement == HIGH) {
+        
         Serial.println("Cat staying confirmed");
         return true;
       }
