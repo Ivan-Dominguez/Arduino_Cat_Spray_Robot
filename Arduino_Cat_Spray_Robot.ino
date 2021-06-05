@@ -33,35 +33,33 @@ void setup() {
   digitalWrite(waterPumpOnPin, LOW);
 
   Serial.begin(9600);
-  delay(1000);
+  delay(300000); //5 minutes = 300000 ms
 }
 
 void loop() { 
-
-   //digitalWrite(waterPumpOnPin, HIGH);
-//int doorDistance = sonar.ping_cm();
-//Serial.println("doorDistance");
- 
-  if(isDoorClosed() && isCatPresent()){
+  bool doorClosed = isDoorClosed();
+  bool catPresent = isCatPresent();
+  
+  if(doorClosed && catPresent){
     Serial.println("Turning spray ON");
     digitalWrite(waterPumpOnPin, HIGH);
-    delay(300);
+    delay(400);
     Serial.println("Turning spray Off");
     digitalWrite(waterPumpOnPin, LOW);
+    systemPauseSeconds(5);
+  }else if(!doorClosed){
+    systemPauseSeconds(300); //5 minutes = 300 sec
   }
-  
-  delay(250);
 }
 
 /* isDoorClosed(): Checks bedroom's door is open or closed */
 bool isDoorClosed(){
   
   int doorDistance = sonar.ping_cm();
+  Serial.println(doorDistance);
   
   if(doorDistance >  initialDoordistance + 5) {
     Serial.println("Door is open");
-    Serial.println(initialDoordistance);
-    Serial.println(doorDistance);
      return false;
   }else{
     Serial.println("Door is closed");
@@ -71,34 +69,25 @@ bool isDoorClosed(){
 
 /* isCatPresent(): Checks if cat is standing in front of machine or just passing by */
 bool isCatPresent(){
-  int delayInSeconds = 9;
 
   int movement = digitalRead(PIROutputPin);
      
-    if(movement == HIGH) {
-      Serial.println("GINGOL detected!"); //Gingol is our cat's name
-    
-      for(int i = delayInSeconds; i > 0; i--){
-        Serial.print("Checking again in: ");
+  if(movement == HIGH) {
+    Serial.println("GINGOL detected!"); //Gingol is our cat's name
+    return true;
+  }else{
+    Serial.println("No movement detected");
+    return false;
+  } 
+}
+
+/* systemPauseSeconds(): When bedroom door is open, start delay so we have time to enter into the room again without being sprayed */
+void systemPauseSeconds(int seconds){
+  
+  for(int i = seconds; i > 0; i--){
+        Serial.print("Delay ends in: ");
         Serial.print(i);
         Serial.println(" seconds");
         delay(1000);
-      }
-
-      //checking if cat still standing by the door after delay
-      movement = digitalRead(PIROutputPin);
-      Serial.println(movement);
-      
-      Serial.println("checking cat again");
-      if(movement == HIGH) {
-        
-        Serial.println("Cat staying confirmed");
-        return true;
-      }
-        
-  }else{
-      Serial.println("No movement");
-      return false;
   }
-  
 }
