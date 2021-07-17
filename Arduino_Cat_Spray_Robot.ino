@@ -1,28 +1,25 @@
 #include <NewPing.h>
 
-#define waterPumpOnPin 13
-
-//intiatiate sonar object
+#define PIRVccPin 7
+#define PIROutputPin 6
 #define triggerPin 10
 #define echoPin 11
-int maxDistance_cm = 7000;
+#define ultrasoundVccPin 12
+#define waterPumpOnPin 13
+#define maxDistance_cm 7000
+
+//intantiate sonar object
 int initialDoordistance = 0;
 NewPing sonar(triggerPin, echoPin, maxDistance_cm);
-
-
-//PIR output pin
-int PIROutputPin = 6;
 
 void setup() {
   
   //setup PIR
-  int PIRVccPin = 7;
   pinMode(PIRVccPin, OUTPUT);
   digitalWrite(PIRVccPin, HIGH);
   pinMode(PIROutputPin, INPUT);
   
   //setup ultrasound
-  int ultrasoundVccPin = 12;
   pinMode(ultrasoundVccPin,OUTPUT);
   digitalWrite(ultrasoundVccPin, HIGH);
   delay(300);
