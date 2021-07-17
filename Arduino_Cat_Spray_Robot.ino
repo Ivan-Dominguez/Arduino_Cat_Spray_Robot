@@ -1,11 +1,11 @@
 #include <NewPing.h>
 
-int waterPumpOnPin = 13;
+#define waterPumpOnPin 13
 
 //intiatiate sonar object
-int triggerPin = 10;
-int echoPin = 11;
-int maxDistance_cm = 500;
+#define triggerPin 10
+#define echoPin 11
+int maxDistance_cm = 7000;
 int initialDoordistance = 0;
 NewPing sonar(triggerPin, echoPin, maxDistance_cm);
 
@@ -37,6 +37,7 @@ void setup() {
 }
 
 void loop() { 
+  
   bool doorClosed = isDoorClosed();
   bool catPresent = isCatPresent();
   
@@ -50,6 +51,8 @@ void loop() {
   }else if(!doorClosed){
     systemPauseSeconds(300); //5 minutes = 300 sec
   }
+
+  delay(250);
 }
 
 /* isDoorClosed(): Checks bedroom's door is open or closed */
@@ -58,7 +61,7 @@ bool isDoorClosed(){
   int doorDistance = sonar.ping_cm();
   Serial.println(doorDistance);
   
-  if(doorDistance >  initialDoordistance + 5) {
+  if(doorDistance >  initialDoordistance + 10) {
     Serial.println("Door is open");
      return false;
   }else{
