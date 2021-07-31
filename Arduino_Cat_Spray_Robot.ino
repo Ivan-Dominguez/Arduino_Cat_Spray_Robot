@@ -5,7 +5,7 @@
 #define triggerPin 10
 #define echoPin 11
 #define ultrasoundVccPin 12
-#define waterPumpOnPin 13
+#define waterPumpOnPin 9
 #define maxDistance_cm 7000
 
 //intantiate sonar object
@@ -39,12 +39,14 @@ void loop() {
   bool catPresent = isCatPresent();
   
   if(doorClosed && catPresent){
+    
     Serial.println("Turning spray ON");
     digitalWrite(waterPumpOnPin, HIGH);
     delay(400);
     Serial.println("Turning spray Off");
     digitalWrite(waterPumpOnPin, LOW);
     systemPauseSeconds(5);
+    
   }else if(!doorClosed){
     systemPauseSeconds(300); //5 minutes = 300 sec
   }
@@ -58,7 +60,7 @@ bool isDoorClosed(){
   int doorDistance = sonar.ping_cm();
   Serial.println(doorDistance);
   
-  if(doorDistance >  initialDoordistance + 10) {
+  if(doorDistance >  initialDoordistance + 10 || doorDistance == 0) {
     Serial.println("Door is open");
      return false;
   }else{
