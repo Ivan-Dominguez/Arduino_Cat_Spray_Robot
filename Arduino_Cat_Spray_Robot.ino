@@ -1,12 +1,10 @@
 #include <NewPing.h>
 
-#define PIRVccPin 7
-#define PIROutputPin 6
+#define PIROutputPin 8
 #define triggerPin 10
 #define echoPin 11
-#define ultrasoundVccPin 12
 #define waterPumpOnPin 9
-#define maxDistance_cm 7000
+#define maxDistance_cm 400
 
 //intantiate sonar object
 int initialDoordistance = 0;
@@ -15,13 +13,9 @@ NewPing sonar(triggerPin, echoPin, maxDistance_cm);
 void setup() {
   
   //setup PIR
-  pinMode(PIRVccPin, OUTPUT);
-  digitalWrite(PIRVccPin, HIGH);
   pinMode(PIROutputPin, INPUT);
   
   //setup ultrasound
-  pinMode(ultrasoundVccPin,OUTPUT);
-  digitalWrite(ultrasoundVccPin, HIGH);
   delay(300);
   initialDoordistance = sonar.ping_cm();
  
@@ -29,7 +23,7 @@ void setup() {
   pinMode(waterPumpOnPin, OUTPUT);
   digitalWrite(waterPumpOnPin, LOW);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   delay(300000); //5 minutes = 300000 ms
 }
 
@@ -42,7 +36,7 @@ void loop() {
     
     Serial.println("Turning spray ON");
     digitalWrite(waterPumpOnPin, HIGH);
-    delay(400);
+    delay(500);
     Serial.println("Turning spray Off");
     digitalWrite(waterPumpOnPin, LOW);
     systemPauseSeconds(5);
@@ -58,9 +52,10 @@ void loop() {
 bool isDoorClosed(){
   
   int doorDistance = sonar.ping_cm();
+  Serial.print("Door distance in cm:" );
   Serial.println(doorDistance);
   
-  if(doorDistance >  initialDoordistance + 10 || doorDistance == 0) {
+  if(doorDistance >  initialDoordistance + 5) {
     Serial.println("Door is open");
      return false;
   }else{
@@ -83,7 +78,7 @@ bool isCatPresent(){
   } 
 }
 
-/* systemPauseSeconds(): When bedroom door is open, start delay so we have time to enter into the room again without being sprayed */
+/* systemPauseSeconds(): When bedroom door is open, a delay is started, so we have time to enter into the room again without being sprayed */
 void systemPauseSeconds(int seconds){
   
   for(int i = seconds; i > 0; i--){
