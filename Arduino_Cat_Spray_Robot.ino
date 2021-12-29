@@ -1,9 +1,10 @@
 #include <NewPing.h>
 
 #define PIROutputPin 8
+#define waterPumpOnPin 9
 #define triggerPin 10
 #define echoPin 11
-#define waterPumpOnPin 9
+#define InitialTimmerONPin 12
 #define maxDistance_cm 400
 
 //intantiate sonar object
@@ -24,7 +25,20 @@ void setup() {
   digitalWrite(waterPumpOnPin, LOW);
 
   Serial.begin(115200);
-  delay(300000); //5 minutes = 300000 ms
+
+  //set starting delay
+
+  if( digitalRead(InitialTimmerONPin) == true){
+    Serial.println("Starting in 5 minutes");
+    delay(300000); //5 minutes = 300000 ms
+  }else{
+    Serial.println("Starting in now!");
+    delay(2000);
+    digitalWrite(waterPumpOnPin, HIGH);
+    delay(200);
+    digitalWrite(waterPumpOnPin, LOW);
+  }
+  
 }
 
 void loop() { 
@@ -36,7 +50,7 @@ void loop() {
     
     Serial.println("Turning spray ON");
     digitalWrite(waterPumpOnPin, HIGH);
-    delay(500);
+    delay(1000);
     Serial.println("Turning spray Off");
     digitalWrite(waterPumpOnPin, LOW);
     systemPauseSeconds(5);
