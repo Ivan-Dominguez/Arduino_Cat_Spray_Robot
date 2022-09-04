@@ -6,6 +6,7 @@
 #define echoPin 11
 #define InitialTimmerONPin 12
 #define maxDistance_cm 400
+#define pauseTime 900000 // 900000 ms = 15 minutes
 
 //intantiate sonar object
 int initialDoordistance = 0;
@@ -26,18 +27,13 @@ void setup() {
 
   Serial.begin(115200);
 
-  //set starting delay
+  //test spray
+  delay(2000);
+  digitalWrite(waterPumpOnPin, HIGH);
+  delay(200);
+  digitalWrite(waterPumpOnPin, LOW);
 
-  if( digitalRead(InitialTimmerONPin) == true){
-    Serial.println("Starting in 5 minutes");
-    delay(300000); //5 minutes = 300000 ms
-  }else{
-    Serial.println("Starting in now!");
-    delay(2000);
-    digitalWrite(waterPumpOnPin, HIGH);
-    delay(200);
-    digitalWrite(waterPumpOnPin, LOW);
-  }
+  setBootupDelay();
   
 }
 
@@ -56,10 +52,23 @@ void loop() {
     systemPauseSeconds(5);
     
   }else if(!doorClosed){
-    systemPauseSeconds(300); //5 minutes = 300 sec
+    systemPauseSeconds(pauseTime);
   }
 
   delay(250);
+}
+
+/* setBootupDelay(): Selects if machine starts spraying right away or with a delay of 5 minutes.
+                     The selection is made using InitialTimmerONPin.
+*/
+void setBootupDelay(){
+  
+  if( digitalRead(InitialTimmerONPin) == true){
+      Serial.println("Starting in 5 minutes");
+      delay(pauseTime);
+    }else{
+      Serial.println("Starting in now!");
+    }
 }
 
 /* isDoorClosed(): Checks bedroom's door is open or closed */
